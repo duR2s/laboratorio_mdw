@@ -9,6 +9,7 @@ import PixelBadge from '@/components/PixelBadge';
 import RetroWindow from '@/components/RetroWindow';
 import { useReservas } from '@/context/ReservasContext';
 import { Usuario } from '@/types';
+import { playMenuMove, playMenuSelect } from '@/lib/retroAudio';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    playMenuSelect();
     const usuarioNuevo: Usuario = {
       id: Date.now(),
       nombre: modo === 'registro' ? nombre : (email.includes('admin') ? 'Administrador Sistema' : 'Juan Pérez (Alumno A)'),
@@ -33,6 +35,7 @@ export default function LoginPage() {
   };
 
   const iniciarComo = (u: Usuario) => {
+    playMenuSelect();
     setUsuarioActual(u);
     router.push(u.rol === 'ADMINISTRADOR' ? '/admin' : '/reservas');
   };
@@ -71,7 +74,10 @@ export default function LoginPage() {
             <div className="flex border-2 border-[#dd6902] mb-5 overflow-hidden">
               <button
                 type="button"
-                onClick={() => setModo('login')}
+                onClick={() => {
+                  playMenuMove();
+                  setModo('login');
+                }}
                 className={`flex-1 py-2 font-pixel text-xs font-bold uppercase transition-all ${
                   modo === 'login'
                     ? 'bg-[#ffb220] text-[#073B4C] border-b-2 border-[#dd6902]'
@@ -82,7 +88,10 @@ export default function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setModo('registro')}
+                onClick={() => {
+                  playMenuMove();
+                  setModo('registro');
+                }}
                 className={`flex-1 py-2 font-pixel text-xs font-bold uppercase transition-all ${
                   modo === 'registro'
                     ? 'bg-[#ffb220] text-[#073B4C] border-b-2 border-[#dd6902]'
@@ -160,7 +169,11 @@ export default function LoginPage() {
                   </label>
                   <select
                     value={rol}
-                    onChange={(e) => setRol(e.target.value as 'ALUMNO' | 'ADMINISTRADOR')}
+                    onMouseDown={() => playMenuMove()}
+                    onChange={(e) => {
+                      playMenuMove();
+                      setRol(e.target.value as 'ALUMNO' | 'ADMINISTRADOR');
+                    }}
                     className="mt-1 w-full border-2 border-[#dd6902] bg-[#fef3c7] p-2 font-pixel text-xs font-bold text-[#073B4C] focus:bg-[#fef3c7] focus:outline-none"
                   >
                     <option value="ALUMNO">Alumno (Reservas y Consultas)</option>

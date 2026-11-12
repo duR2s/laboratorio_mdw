@@ -6,7 +6,9 @@ import PixelIcon from '@/components/PixelIcon';
 import PixelButton from '@/components/PixelButton';
 import PixelBadge from '@/components/PixelBadge';
 import RetroWindow from '@/components/RetroWindow';
+import ClientPortal from '@/components/ClientPortal';
 import { useReservas } from '@/context/ReservasContext';
+import { playMenuMove, playMenuSelect, playErrorBump } from '@/lib/retroAudio';
 
 export default function AdminPage() {
   const {
@@ -34,6 +36,7 @@ export default function AdminPage() {
   const handleCrearSalaSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevoNombre.trim()) return;
+    playMenuSelect();
     crearSala({
       nombre: nuevoNombre,
       capacidad: nuevaCapacidad,
@@ -74,14 +77,15 @@ export default function AdminPage() {
               <PixelButton
                 variant="dark"
                 size="sm"
-                onClick={() =>
+                onClick={() => {
+                  playMenuSelect();
                   setUsuarioActual({
                     id: 99,
                     nombre: 'Administrador General',
                     email: 'admin@universidad.edu',
                     rol: 'ADMINISTRADOR',
-                  })
-                }
+                  });
+                }}
                 icon={<PixelIcon name="shield" size={14} color="#FFFFFF" />}
               >
                 Elevar a Admin
@@ -155,7 +159,10 @@ export default function AdminPage() {
             <PixelButton
               variant="warning"
               size="sm"
-              onClick={() => setModalNuevaSala(true)}
+              onClick={() => {
+                playMenuMove();
+                setModalNuevaSala(true);
+              }}
               icon={<PixelIcon name="plus" size={12} />}
             >
               Nueva Sala
@@ -191,7 +198,10 @@ export default function AdminPage() {
                     <td className="p-3 text-right">
                       <button
                         type="button"
-                        onClick={() => eliminarSala(sala.id)}
+                        onClick={() => {
+                          playErrorBump();
+                          eliminarSala(sala.id);
+                        }}
                         className="border-2 border-[#e11d48] bg-[#fb7185] px-2.5 py-1 font-pixel text-[11px] font-bold text-white hover:bg-[#e11d48] transition-colors"
                       >
                         Eliminar
@@ -325,22 +335,21 @@ export default function AdminPage() {
 
       {/* Modal para Crear Nueva Sala (Ventana Flotante Amarilla) */}
       {modalNuevaSala && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-none">
+        <ClientPortal>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-none">
           <div className="w-full max-w-md border-4 border-[#dd6902] bg-[#ffdf88] overflow-hidden text-[#073B4C] shadow-2xl animate-in fade-in zoom-in-95 duration-100">
             <div className="flex items-center justify-between border-b-[3px] border-[#dd6902] bg-[#ffb220] px-3.5 py-2.5">
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="inline-block h-3 w-3 rounded-full bg-[#EF476F] border border-[#dd6902]" />
-                  <span className="inline-block h-3 w-3 rounded-full bg-[#FFD166] border border-[#dd6902]" />
-                  <span className="inline-block h-3 w-3 rounded-full bg-[#118AB2] border border-[#dd6902]" />
-                </div>
-                <span className="font-pixel text-xs font-bold uppercase tracking-wider text-[#073B4C] ml-1.5">
+                <span className="font-pixel text-xs font-bold uppercase tracking-wider text-[#073B4C]">
                   CREAR_ESPACIO.SYS
                 </span>
               </div>
               <button
                 type="button"
-                onClick={() => setModalNuevaSala(false)}
+                onClick={() => {
+                  playErrorBump();
+                  setModalNuevaSala(false);
+                }}
                 className="flex h-4 w-4 items-center justify-center border-2 border-[#dd6902] bg-[#EF476F] text-white font-pixel font-bold text-[10px] leading-none hover:brightness-110 active:scale-95 transition-transform"
               >
                 ✕
@@ -395,7 +404,10 @@ export default function AdminPage() {
               <div className="flex items-center justify-end gap-3 border-t-[3px] border-[#dd6902] bg-[#ffb220]/25 pt-3 -mx-5 -mb-5 px-5 pb-4">
                 <button
                   type="button"
-                  onClick={() => setModalNuevaSala(false)}
+                  onClick={() => {
+                    playErrorBump();
+                    setModalNuevaSala(false);
+                  }}
                   className="border-2 border-[#dd6902] bg-transparent px-3 py-1.5 font-pixel text-xs font-bold uppercase text-[#073B4C] hover:bg-[#ffb220]/50 transition-colors"
                 >
                   Cancelar
@@ -412,6 +424,7 @@ export default function AdminPage() {
             </form>
           </div>
         </div>
+        </ClientPortal>
       )}
     </div>
   );

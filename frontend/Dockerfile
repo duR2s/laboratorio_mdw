@@ -11,6 +11,7 @@ RUN npm ci
 
 # Copiar archivos fuente y configuraciones
 COPY tsconfig.json tailwind.config.ts postcss.config.mjs next.config.mjs ./
+COPY public ./public
 COPY src ./src
 
 # Compilar proyecto Next.js
@@ -31,6 +32,7 @@ RUN npm ci --only=production
 
 # Copiar archivos generados por Next.js
 COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
 COPY --from=builder /app/src ./src
 
 EXPOSE 3000

@@ -1,42 +1,91 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import PixelIcon from '@/components/PixelIcon';
+import { playMenuMove, playPauseSound } from '@/lib/retroAudio';
 
 const MENU_ITEMS = [
-  { label: 'RESERVAR LAB', href: '/reservas' },
+  { label: 'Disponibilidad', href: '/reservas' },
   { label: 'MIS RESERVAS', href: '/mis-reservas' },
-  { label: 'ACCESO / LOGIN', href: '/login' },
-  { label: 'PANEL ADMIN', href: '/admin' },
+  { label: 'Mi Cuenta', href: '/login' },
+  { label: '¿PANEL ADMIN?', href: '/admin' },
 ];
 
 export default function LandingPage() {
   const router = useRouter();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isTriangleBlinking, setIsTriangleBlinking] = useState(false);
+
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Limpiar timers al desmontar
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+    };
+  }, []);
+
+  const handleSelect = useCallback(
+    (idx: number) => {
+      if (isConfirming) return;
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+
+      setSelectedIndex(idx);
+      setIsConfirming(true);
+      setIsTriangleBlinking(true);
+
+      // Sonido de Pausa NES para cambio de página / navegación
+      playPauseSound();
+
+      // Espera 0.6s (600ms) antes de navegar a la página seleccionada
+      navTimerRef.current = setTimeout(() => {
+        router.push(MENU_ITEMS[idx].href);
+      }, 600);
+    },
+    [isConfirming, router]
+  );
 
   // Navegación por teclado (Flechas arriba/abajo y Enter)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isConfirming) return;
       if (e.key === 'ArrowDown') {
         e.preventDefault();
+        playMenuMove();
         setSelectedIndex((prev) => (prev + 1) % MENU_ITEMS.length);
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
+        playMenuMove();
         setSelectedIndex((prev) => (prev - 1 + MENU_ITEMS.length) % MENU_ITEMS.length);
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        router.push(MENU_ITEMS[selectedIndex].href);
+        handleSelect(selectedIndex);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIndex, router]);
+  }, [selectedIndex, isConfirming, handleSelect]);
 
-  const handleSelect = (idx: number) => {
-    setSelectedIndex(idx);
-    router.push(MENU_ITEMS[idx].href);
+  // Suavizado ligero en el eje vertical al pasar el mouse para evitar disparos encimados
+  const handleOptionHover = (idx: number) => {
+    if (isConfirming || selectedIndex === idx) return;
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = setTimeout(() => {
+      playMenuMove();
+      setSelectedIndex(idx);
+    }, 45);
+  };
+
+  const handleOptionLeave = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
   };
 
   return (
@@ -45,93 +94,62 @@ export default function LandingPage() {
         {/* Navbar Transparente Superior (se vuelve sólido #073B4C con scroll) */}
         <Navbar />
 
-        {/* Contenido Principal con Distribución de Cartel Retro Arcade (40% ancho de pantalla) */}
-        <main className="flex-1 flex items-center justify-center p-3 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto min-w-0 overflow-hidden box-border">
-          <div className="w-full lg:w-[42vw] max-w-2xl mx-auto flex flex-col items-center relative py-6 px-4 sm:px-8 border-2 border-[#FFFAEB]/20 bg-transparent">
+        {/* Contenido Principal con Distribución de Cartel Retro Arcade */}
+        <main className="flex-1 flex flex-col items-center justify-center py-4 sm:py-6 lg:py-8 w-full min-w-0 box-border">
+          {/* Recuadro que rodea exclusivamente el Título y el Seleccionador (expandido al ancho del título en Press Start 2P) */}
+          <div className="w-fit max-w-[95vw] mx-auto flex flex-col items-center relative py-6 sm:py-8 px-4 sm:px-10 lg:px-14 border-2 border-transparent bg-transparent">
             {/* Esquinas Neobrutalistas / Retro Brackets */}
             <span className="absolute top-0 left-0 w-4 h-4 border-t-3 border-l-3 border-[#FFFAEB]" />
             <span className="absolute top-0 right-0 w-4 h-4 border-t-3 border-r-3 border-[#FFFAEB]" />
             <span className="absolute bottom-0 left-0 w-4 h-4 border-b-3 border-l-3 border-[#FFFAEB]" />
             <span className="absolute bottom-0 right-0 w-4 h-4 border-b-3 border-r-3 border-[#FFFAEB]" />
 
-            {/* Marcadores Laterales Punteados estilo Arcade Frame */}
-            <div className="absolute left-2 top-1/4 bottom-1/4 flex flex-col justify-between items-center">
-              <span className="w-1.5 h-1.5 bg-[#FFFAEB]/30" />
-              <span className="w-1.5 h-1.5 bg-[#FFFAEB]/30" />
-              <span className="w-2 h-2 bg-[#EF476F] shadow-[0_0_6px_#EF476F]" />
-              <span className="w-1.5 h-1.5 bg-[#FFFAEB]/30" />
-              <span className="w-1.5 h-1.5 bg-[#FFFAEB]/30" />
-            </div>
-            <div className="absolute right-2 top-1/4 bottom-1/4 flex flex-col justify-between items-center">
-              <span className="w-1.5 h-1.5 bg-[#FFFAEB]/30" />
-              <span className="w-1.5 h-1.5 bg-[#FFFAEB]/30" />
-              <span className="w-2 h-2 bg-[#EF476F] shadow-[0_0_6px_#EF476F]" />
-              <span className="w-1.5 h-1.5 bg-[#FFFAEB]/30" />
-              <span className="w-1.5 h-1.5 bg-[#FFFAEB]/30" />
-            </div>
-
-            {/* Cabecera Superior del Marco (HUD Arcade con Pixel Art) */}
-            <div className="w-full flex items-center justify-between text-[#FFFAEB] font-pixel text-xs sm:text-sm tracking-wider mb-6 sm:mb-8 pb-2">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-[#FFD166] mr-1">1UP</span>
-                {/* Corazón lleno en pixel art */}
-                <PixelIcon name="heart" size={16} color="#EF476F" className="animate-pulse" />
-                {/* Corazones vacíos en pixel art */}
-                <PixelIcon name="heart-outline" size={16} color="#FFFAEB" className="opacity-60" />
-                <PixelIcon name="heart-outline" size={16} color="#FFFAEB" className="opacity-60" />
-                {/* Fila de puntos en pixel art */}
-                <div className="hidden sm:flex items-center gap-1.5 ml-2">
-                  <span className="w-1.5 h-1.5 bg-[#FFFAEB]/40" />
-                  <span className="w-1.5 h-1.5 bg-[#FFFAEB]/40" />
-                  <span className="w-1.5 h-1.5 bg-[#FFFAEB]/40" />
-                  <span className="w-1.5 h-1.5 bg-[#FFFAEB]/40" />
-                  <span className="w-1.5 h-1.5 bg-[#FFFAEB]/40" />
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 text-[#FFFAEB] font-bold">
-                <span className="tracking-widest">CONTINUE?</span>
-                <svg width={10} height={10} viewBox="0 0 10 10" fill="none" className="inline-block shrink-0">
-                  <path d="M0 0h10v10H7V3H0V0z" fill="#FFD166" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Gran Título Centrado en 2 Líneas (Laboratorio en Amarillo #FFD166) */}
-            <div className="my-2 sm:my-4 text-center">
-              <h1 className="font-pixel text-4xl sm:text-7xl lg:text-8xl font-bold uppercase text-white tracking-wider leading-[0.9] drop-shadow-[0_2px_0_#073B4C]">
-                Reserva tu
-                <br />
-                <span className="text-[#FFD166]">Laboratorio</span>
+            {/* Gran Título Centrado en 2 Líneas con Press Start 2P (Proporción 1:2 de Figma: 48px arriba / 96px abajo en desktop) */}
+            <div className="my-2 sm:my-4 text-center px-2">
+              <h1 className="font-arcade font-normal uppercase [text-shadow:0_2px_0_#073B4C] whitespace-nowrap">
+                <span className="block text-base sm:text-2xl md:text-3xl lg:text-[42px] xl:text-[48px] text-white mb-3 sm:mb-5 tracking-[0.1em] leading-tight">
+                  Reserva tu
+                </span>
+                <span className="block text-2xl sm:text-5xl md:text-6xl lg:text-[76px] xl:text-[96px] text-[#FFD166] tracking-[0.05em] leading-[1.15]">
+                  Laboratorio
+                </span>
               </h1>
             </div>
 
-            {/* Menú Interactivo Vertical (Tamaño x1.5 y Triángulo casi igual a la altura de la fuente) */}
-            <div className="my-6 sm:my-8 w-full max-w-lg lg:max-w-xl flex flex-col items-center space-y-3 font-pixel">
+            {/* Menú Interactivo Vertical en Press Start 2P (Proporción Figma: 32px base -> 40px seleccionado):
+                1) Primero cambia color y aparece la flecha al instante (duration-0).
+                2) Luego aumenta el tamaño con 1 frame intermedio (steps(2, end)) estilo juego retro 8-bit.
+                3) Al hacer click: sonido de Pausa, a los 0.2s parpadea el triángulo y a los 0.6s cambia de página. */}
+            <div
+              onMouseLeave={handleOptionLeave}
+              className="my-6 sm:my-8 w-full max-w-xl lg:max-w-2xl h-[220px] sm:h-[260px] lg:h-[300px] flex flex-col items-center justify-center gap-3 sm:gap-4 font-arcade shrink-0"
+            >
               {MENU_ITEMS.map((item, idx) => {
                 const isSelected = selectedIndex === idx;
+                const shouldBlink = isSelected && isConfirming && isTriangleBlinking;
                 return (
                   <button
                     key={item.label}
                     type="button"
                     onClick={() => handleSelect(idx)}
-                    onMouseEnter={() => setSelectedIndex(idx)}
-                    className={`group w-full flex items-center justify-center gap-2 sm:gap-3 py-1.5 text-center font-bold tracking-widest uppercase transition-all ${
+                    onMouseEnter={() => handleOptionHover(idx)}
+                    className={`group w-full h-11 sm:h-13 lg:h-16 flex items-center justify-center gap-2.5 sm:gap-3.5 text-center font-normal tracking-[0.14em] uppercase leading-none whitespace-nowrap shrink-0 text-sm sm:text-xl md:text-2xl lg:text-[32px] origin-center transition-transform [transition-timing-function:steps(2,end)] ${
                       isSelected
-                        ? 'text-[#06D6A0] text-3xl sm:text-4xl lg:text-5xl'
-                        : 'text-[#FFFAEB]/85 hover:text-white text-2xl sm:text-3xl lg:text-4xl'
+                        ? 'text-[#06D6A0] scale-[1.18] sm:scale-[1.22] lg:scale-[1.25] duration-[90ms]'
+                        : 'text-[#FFFAEB]/85 hover:text-white scale-100 duration-0'
                     }`}
                   >
-                    {/* Ícono Play Pixelado Cursor con altura acorde a la fuente */}
+                    {/* Ícono Play Pixelado Cursor: fijo en hover normal, parpadea en 8-bit 0.4s después del click */}
                     <span
-                      className={`inline-flex items-center justify-center w-8 sm:w-10 lg:w-12 shrink-0 transition-opacity ${
+                      className={`inline-flex items-center justify-center w-6 sm:w-8 lg:w-10 shrink-0 ${
                         isSelected ? 'opacity-100 text-[#06D6A0]' : 'opacity-0'
-                      }`}
+                      } ${shouldBlink ? 'anim-triangle-retro-blink' : ''}`}
                     >
                       <PixelIcon
                         name="play"
-                        size={44}
+                        size={36}
                         color="#06D6A0"
-                        className="w-7 h-7 sm:w-9 sm:h-9 lg:w-11 lg:h-11 animate-pulse"
+                        className="w-5 h-5 sm:w-7 sm:h-7 lg:w-9 lg:h-9"
                       />
                     </span>
 
@@ -139,7 +157,7 @@ export default function LandingPage() {
 
                     {/* Espaciador invisible para balancear y centrar el texto con el icono */}
                     <span
-                      className="inline-block w-8 sm:w-10 lg:w-12 shrink-0 opacity-0"
+                      className="inline-block w-6 sm:w-8 lg:w-10 shrink-0 opacity-0"
                       aria-hidden="true"
                     />
                   </button>
@@ -147,18 +165,28 @@ export default function LandingPage() {
               })}
             </div>
 
-            {/* Ventana Retro (Paleta de 3 Colores de la Referencia: #ffdf88 fondo, #ffb220 cabecera, #dd6902 bordes) */}
-            <div className="w-full mt-6 border-4 border-[#dd6902] bg-[#ffdf88] overflow-hidden">
-              {/* Cabecera de la Ventana en #ffb220 con Borde #dd6902 */}
+            <style jsx>{`
+              @keyframes retroTriangleBlink {
+                0%, 49.99% {
+                  opacity: 0;
+                }
+                50%, 100% {
+                  opacity: 1;
+                }
+              }
+              .anim-triangle-retro-blink {
+                animation: retroTriangleBlink 0.12s steps(1, end) infinite;
+              }
+            `}</style>
+          </div>
+
+          {/* Contenedor Principal de la Ventana Retro (mismo max-w de 80rem del nav con 1.5rem / px-6 de padding) */}
+          <div className="w-full max-w-[80rem] mx-auto px-6 mt-6 sm:mt-8">
+            <div className="w-full border-4 border-[#dd6902] bg-[#ffdf88] overflow-hidden">
+              {/* Cabecera de la Ventana en #ffb220 con Borde #dd6902 (sin los círculos de Mac) */}
               <div className="bg-[#ffb220] px-3.5 py-2 flex items-center justify-between border-b-[3px] border-[#dd6902]">
                 <div className="flex items-center gap-2">
-                  {/* Tres Círculos de Color Estilo Mac: Rojo (#EF476F), Amarillo (#FFD166), Azul (#118AB2) */}
-                  <div className="flex items-center gap-1.5">
-                    <span className="inline-block w-3 h-3 rounded-full bg-[#EF476F] border border-[#dd6902]" />
-                    <span className="inline-block w-3 h-3 rounded-full bg-[#FFD166] border border-[#dd6902]" />
-                    <span className="inline-block w-3 h-3 rounded-full bg-[#118AB2] border border-[#dd6902]" />
-                  </div>
-                  <span className="font-pixel text-xs font-bold uppercase tracking-wider text-[#073B4C] ml-1.5">
+                  <span className="font-pixel text-xs font-bold uppercase tracking-wider text-[#073B4C]">
                     labreserva_system.exe
                   </span>
                 </div>

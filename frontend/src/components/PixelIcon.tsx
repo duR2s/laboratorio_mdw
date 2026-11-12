@@ -26,7 +26,9 @@ export type PixelIconName =
   | 'crosshair'
   | 'gamepad'
   | 'chevron-down'
-  | 'arrow-down';
+  | 'arrow-down'
+  | 'volume-on'
+  | 'volume-off';
 
 interface PixelIconProps {
   name: PixelIconName;
@@ -235,6 +237,20 @@ export default function PixelIcon({
         return (
           <path
             d="M5 8h2v2h2v2h2v2h2v-2h2v-2h2V8h2v2h-2v2h-2v2h-2v2h-2v-2H9v-2H7v-2H5V8z"
+            fill={color}
+          />
+        );
+      case 'volume-on':
+        return (
+          <path
+            d="M3 9h4v6H3V9zm4-2h2v10H7V7zm2-2h2v14H9V5zm5 4h2v2h-2V9zm0 4h2v2h-2v-2zm3-6h2v2h-2V7zm2 2h2v6h-2V9zm-2 6h2v2h-2v-2z"
+            fill={color}
+          />
+        );
+      case 'volume-off':
+        return (
+          <path
+            d="M3 9h4v6H3V9zm4-2h2v10H7V7zm2-2h2v14H9V5zm5 4h2v2h-2V9zm4 0h2v2h-2V9zm-2 2h2v2h-2v-2zm-2 2h2v2h-2v-2zm4 0h2v2h-2v-2z"
             fill={color}
           />
         );

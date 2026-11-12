@@ -5,6 +5,7 @@ import { Sala, Reserva, Usuario } from '@/types';
 import PixelIcon, { PixelIconName } from '@/components/PixelIcon';
 import RetroWindow from '@/components/RetroWindow';
 import { useWindowWidth } from '@/hooks/useWindowWidth';
+import { playMenuMove, playErrorBump } from '@/lib/retroAudio';
 
 interface CalendarioGridProps {
   fechaSeleccionada: string;
@@ -88,7 +89,11 @@ export default function CalendarioGrid({
               id="fecha-picker"
               type="date"
               value={fechaSeleccionada}
-              onChange={(e) => onCambiarFecha(e.target.value)}
+              onClick={() => playMenuMove()}
+              onChange={(e) => {
+                playMenuMove();
+                onCambiarFecha(e.target.value);
+              }}
               className="border-2 border-[#dd6902] bg-[#fef3c7] px-3 py-1.5 font-pixel text-sm font-bold text-[#073B4C] focus:bg-[#fef3c7] focus:outline-none"
             />
           </div>
@@ -185,10 +190,13 @@ export default function CalendarioGrid({
                     return (
                       <td
                         key={sala.id}
+                        onClick={() => {
+                          if (!esMia) playErrorBump();
+                        }}
                         className={`border-r-2 border-b p-2.5 last:border-r-0 transition-colors ${
                           esMia
                             ? 'border-[#0284c7] bg-[#38bdf8] text-[#073B4C] hover:brightness-105'
-                            : 'border-[#e11d48] bg-[#fb7185] text-[#073B4C] hover:brightness-105'
+                            : 'border-[#e11d48] bg-[#fb7185] text-[#073B4C] hover:brightness-105 cursor-not-allowed'
                         }`}
                       >
                         <div className="flex h-full flex-col justify-between">
@@ -224,7 +232,11 @@ export default function CalendarioGrid({
                     >
                       <button
                         type="button"
-                        onClick={() => onSeleccionarBloque(sala, hora)}
+                        onMouseEnter={() => playMenuMove()}
+                        onClick={() => {
+                          playMenuMove();
+                          onSeleccionarBloque(sala, hora);
+                        }}
                         className="group flex h-full w-full flex-col justify-between p-2.5 text-left transition-colors cursor-pointer"
                       >
                         <div className="flex items-center justify-between text-[#073B4C]">

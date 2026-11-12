@@ -6,6 +6,7 @@ import PixelIcon from '@/components/PixelIcon';
 import PixelButton from '@/components/PixelButton';
 import PixelBadge from '@/components/PixelBadge';
 import RetroWindow from '@/components/RetroWindow';
+import { playMenuMove, playMenuSelect } from '@/lib/retroAudio';
 
 interface SimuladorConcurrenciaProps {
   salas: Sala[];
@@ -30,6 +31,7 @@ export default function SimuladorConcurrencia({
 
   const handleSimular = async () => {
     if (!salaSeleccionada) return;
+    playMenuSelect();
 
     setEjecutando(true);
     setResultadoA(null);
@@ -84,7 +86,11 @@ export default function SimuladorConcurrencia({
             </label>
             <select
               value={salaId}
-              onChange={(e) => setSalaId(Number(e.target.value))}
+              onMouseDown={() => playMenuMove()}
+              onChange={(e) => {
+                playMenuMove();
+                setSalaId(Number(e.target.value));
+              }}
               className="mt-1 w-full border-3 border-neo-dark bg-transparent p-2.5 font-pixel text-xs font-bold text-neo-dark focus:bg-neo-yellow focus:outline-none"
             >
               {salas.map((s) => (
@@ -101,7 +107,11 @@ export default function SimuladorConcurrencia({
             </label>
             <select
               value={hora}
-              onChange={(e) => setHora(Number(e.target.value))}
+              onMouseDown={() => playMenuMove()}
+              onChange={(e) => {
+                playMenuMove();
+                setHora(Number(e.target.value));
+              }}
               className="mt-1 w-full border-3 border-neo-dark bg-transparent p-2.5 font-pixel text-xs font-bold text-neo-dark focus:bg-neo-yellow focus:outline-none"
             >
               {Array.from({ length: 13 }, (_, i) => i + 8).map((h) => (

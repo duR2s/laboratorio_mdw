@@ -7,6 +7,11 @@ import PixelButton from '@/components/PixelButton';
 import PixelBadge from '@/components/PixelBadge';
 import RetroWindow from '@/components/RetroWindow';
 import { apiSugerirMejorSala } from '@/services/api';
+import {
+  playMenuMove,
+  playMenuSelect,
+  playErrorBump,
+} from '@/lib/retroAudio';
 
 interface SugerirSalaProps {
   fechaActual: string;
@@ -69,6 +74,7 @@ export default function SugerirSala({
           puntuacionCosto: costo,
           porcentajeAjuste: porcentaje,
         });
+        playMenuSelect();
         return;
       }
     } catch {
@@ -80,6 +86,7 @@ export default function SugerirSala({
 
     if (candidatas.length === 0) {
       setSugerencia(null);
+      playErrorBump();
       alert('No se encontraron salas con la capacidad requerida.');
       return;
     }
@@ -114,6 +121,11 @@ export default function SugerirSala({
     }
 
     setSugerencia(mejorResultado);
+    if (mejorResultado) {
+      playMenuSelect();
+    } else {
+      playErrorBump();
+    }
   };
 
   return (
@@ -158,7 +170,11 @@ export default function SugerirSala({
                 type="date"
                 min={fechaActual}
                 value={fecha}
-                onChange={(e) => setFecha(e.target.value)}
+                onClick={() => playMenuMove()}
+                onChange={(e) => {
+                  playMenuMove();
+                  setFecha(e.target.value);
+                }}
                 className="mt-1 w-full border-2 border-[#dd6902] bg-[#fef3c7] p-2.5 font-pixel text-xs font-bold text-[#073B4C] focus:bg-[#fef3c7] focus:outline-none"
                 required
               />
@@ -170,7 +186,11 @@ export default function SugerirSala({
               </label>
               <select
                 value={horaDeseada}
-                onChange={(e) => setHoraDeseada(Number(e.target.value))}
+                onMouseDown={() => playMenuMove()}
+                onChange={(e) => {
+                  playMenuMove();
+                  setHoraDeseada(Number(e.target.value));
+                }}
                 className="mt-1 w-full border-2 border-[#dd6902] bg-[#fef3c7] p-2.5 font-pixel text-xs font-bold text-[#073B4C] focus:bg-[#fef3c7] focus:outline-none"
               >
                 {Array.from({ length: 13 }, (_, i) => i + 8).map((h) => (
@@ -205,7 +225,7 @@ export default function SugerirSala({
             <button
               type="submit"
               disabled={!formularioValido}
-              className={`w-full py-2.5 px-4 font-pixel text-xs sm:text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 select-none ${
+              className={`w-full py-3 px-4 font-arcade text-[11px] sm:text-xs font-normal uppercase tracking-wider transition-all flex items-center justify-center gap-2 select-none ${
                 formularioValido
                   ? 'bg-[#06D6A0] text-[#073B4C] border-2 border-[#073B4C] hover:bg-[#05b88a] cursor-pointer shadow-sm active:translate-y-0.5'
                   : 'bg-[#a7f3d0] text-[#073B4C]/50 border-2 border-[#073B4C]/30 cursor-not-allowed'
@@ -286,9 +306,10 @@ export default function SugerirSala({
                 variant="success"
                 size="lg"
                 className="w-full"
-                onClick={() =>
-                  onReservarSugerencia(sugerencia.sala, sugerencia.horaInicio)
-                }
+                onClick={() => {
+                  playMenuSelect();
+                  onReservarSugerencia(sugerencia.sala, sugerencia.horaInicio);
+                }}
                 icon={<PixelIcon name="check" size={18} />}
               >
                 Aceptar y Confirmar Reserva

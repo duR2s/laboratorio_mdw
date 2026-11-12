@@ -4,6 +4,8 @@ import React from 'react';
 import { Sala, Usuario } from '@/types';
 import PixelIcon from '@/components/PixelIcon';
 import PixelButton from '@/components/PixelButton';
+import ClientPortal from '@/components/ClientPortal';
+import { playErrorBump } from '@/lib/retroAudio';
 
 interface ModalReservaProps {
   abierto: boolean;
@@ -32,19 +34,14 @@ export default function ModalReserva({
   }${horaFin}:00`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-none">
-      {/* Ventana Flotante Estilo Retro OS (Paleta Amarilla 200/400/600) */}
-      <div className="w-full max-w-md border-4 border-[#dd6902] bg-[#ffdf88] overflow-hidden text-[#073B4C] shadow-2xl animate-in fade-in zoom-in-95 duration-100">
+    <ClientPortal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-none">
+        {/* Ventana Flotante Estilo Retro OS (Paleta Amarilla 200/400/600) */}
+        <div className="w-full max-w-md border-4 border-[#dd6902] bg-[#ffdf88] overflow-hidden text-[#073B4C] shadow-2xl animate-in fade-in zoom-in-95 duration-100">
         {/* Cabecera de la Ventana en #ffb220 con borde #dd6902 */}
         <div className="flex items-center justify-between border-b-[3px] border-[#dd6902] bg-[#ffb220] px-3.5 py-2.5">
           <div className="flex items-center gap-2">
-            {/* Tres Círculos de Color Estilo Mac: Rojo (#EF476F), Amarillo (#FFD166), Azul (#118AB2) */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="inline-block h-3 w-3 rounded-full bg-[#EF476F] border border-[#dd6902]" />
-              <span className="inline-block h-3 w-3 rounded-full bg-[#FFD166] border border-[#dd6902]" />
-              <span className="inline-block h-3 w-3 rounded-full bg-[#118AB2] border border-[#dd6902]" />
-            </div>
-            <h3 className="font-pixel text-xs font-bold uppercase tracking-wider text-[#073B4C] ml-1.5">
+            <h3 className="font-pixel text-xs font-bold uppercase tracking-wider text-[#073B4C]">
               CONFIRMAR_SELECCION.SYS
             </h3>
           </div>
@@ -58,7 +55,10 @@ export default function ModalReserva({
             </span>
             <button
               type="button"
-              onClick={onCerrar}
+              onClick={() => {
+                playErrorBump();
+                onCerrar();
+              }}
               aria-label="Cerrar modal"
               className="flex h-4 w-4 items-center justify-center border-2 border-[#dd6902] bg-[#EF476F] text-white font-pixel font-bold text-[10px] leading-none hover:brightness-110 active:scale-95 transition-transform"
             >
@@ -141,7 +141,10 @@ export default function ModalReserva({
         <div className="flex items-center justify-end gap-3 border-t-[3px] border-[#dd6902] bg-[#ffb220]/25 px-5 py-3">
           <button
             type="button"
-            onClick={onCerrar}
+            onClick={() => {
+              playErrorBump();
+              onCerrar();
+            }}
             className="border-2 border-[#dd6902] bg-transparent px-3 py-1.5 font-pixel text-xs font-bold uppercase text-[#073B4C] hover:bg-[#ffb220]/50 transition-colors"
           >
             Cancelar
@@ -158,5 +161,6 @@ export default function ModalReserva({
         </div>
       </div>
     </div>
+    </ClientPortal>
   );
 }

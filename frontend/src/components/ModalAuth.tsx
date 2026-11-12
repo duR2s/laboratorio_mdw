@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Usuario } from '@/types';
 import PixelIcon from '@/components/PixelIcon';
 import PixelButton from '@/components/PixelButton';
+import ClientPortal from '@/components/ClientPortal';
 
 interface ModalAuthProps {
   abierto: boolean;
@@ -35,19 +36,14 @@ export default function ModalAuth({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-none">
+    <ClientPortal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-none">
       {/* Ventana Flotante Estilo Retro OS (Paleta Azul 200/400/600) */}
       <div className="w-full max-w-sm border-4 border-[#0284c7] bg-[#bae6fd] overflow-hidden text-[#073B4C] shadow-2xl animate-in fade-in zoom-in-95 duration-100">
         {/* Cabecera de la Ventana en #38bdf8 con Borde #0284c7 */}
         <div className="flex items-center justify-between border-b-[3px] border-[#0284c7] bg-[#38bdf8] px-3.5 py-2.5">
           <div className="flex items-center gap-2">
-            {/* Tres Círculos de Color Estilo Mac */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="inline-block h-3 w-3 rounded-full bg-[#EF476F] border border-[#0284c7]" />
-              <span className="inline-block h-3 w-3 rounded-full bg-[#FFD166] border border-[#0284c7]" />
-              <span className="inline-block h-3 w-3 rounded-full bg-[#118AB2] border border-[#0284c7]" />
-            </div>
-            <span className="font-pixel text-xs font-bold uppercase tracking-wider text-[#073B4C] ml-1.5">
+            <span className="font-pixel text-xs font-bold uppercase tracking-wider text-[#073B4C]">
               AUTH_SYSTEM.EXE
             </span>
           </div>
@@ -168,5 +164,6 @@ export default function ModalAuth({
         </form>
       </div>
     </div>
+    </ClientPortal>
   );
 }

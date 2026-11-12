@@ -133,13 +133,7 @@ export default function MisReservas({
                   className={`px-3.5 py-2 flex items-center justify-between ${theme.header}`}
                 >
                   <div className="flex items-center gap-2">
-                    {/* Tres Círculos Mac */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <span className={`inline-block w-2.5 h-2.5 rounded-full bg-[#EF476F] border ${theme.dotBorder}`} />
-                      <span className={`inline-block w-2.5 h-2.5 rounded-full bg-[#FFD166] border ${theme.dotBorder}`} />
-                      <span className={`inline-block w-2.5 h-2.5 rounded-full bg-[#118AB2] border ${theme.dotBorder}`} />
-                    </div>
-                    <span className="font-pixel text-xs font-bold text-[#073B4C] ml-1">
+                    <span className="font-pixel text-xs font-bold text-[#073B4C]">
                       #{reserva.id}
                     </span>
                     <PixelBadge

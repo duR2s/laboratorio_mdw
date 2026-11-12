@@ -53,19 +53,19 @@ export default function PixelButton({
     const borderClass = isGhost ? 'border-0' : size === 'sm' ? 'border-2' : 'border-3';
     switch (size) {
       case 'sm':
-        return `px-2.5 py-1 text-xs ${borderClass}`;
+        return `px-2.5 py-1.5 text-[10px] sm:text-[11px] ${borderClass}`;
       case 'lg':
-        return `px-6 py-3 text-base ${borderClass}`;
+        return `px-6 py-3 text-xs sm:text-sm ${borderClass}`;
       case 'md':
       default:
-        return `px-4 py-2 text-sm ${borderClass}`;
+        return `px-4 py-2 text-[11px] sm:text-xs ${borderClass}`;
     }
   };
 
   return (
     <button
       disabled={disabled}
-      className={`inline-flex items-center justify-center gap-2 font-pixel font-bold uppercase tracking-wider transition-colors select-none ${getVariantStyles()} ${getSizeStyles()} ${
+      className={`inline-flex items-center justify-center gap-2 font-arcade font-normal uppercase tracking-wider transition-colors select-none ${getVariantStyles()} ${getSizeStyles()} ${
         disabled
           ? 'cursor-not-allowed opacity-50'
           : 'cursor-pointer'

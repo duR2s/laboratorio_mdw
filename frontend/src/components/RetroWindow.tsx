@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useWindowWidth } from '@/hooks/useWindowWidth';
+import { playErrorBump } from '@/lib/retroAudio';
 
 export type WindowColor = 'yellow' | 'blue' | 'red';
 
@@ -85,19 +86,7 @@ export default function RetroWindow({
         className={`px-2.5 sm:px-3.5 py-2 flex items-center justify-between min-w-0 max-w-full overflow-hidden ${themeStyles.header}`}
       >
         <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 overflow-hidden">
-          {/* Tres Círculos de Color Estilo Mac */}
-          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            <span
-              className={`inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#EF476F] border ${themeStyles.dotBorder}`}
-            />
-            <span
-              className={`inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#FFD166] border ${themeStyles.dotBorder}`}
-            />
-            <span
-              className={`inline-block w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#118AB2] border ${themeStyles.dotBorder}`}
-            />
-          </div>
-          <span className="font-pixel text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#073B4C] ml-1 sm:ml-1.5 truncate">
+          <span className="font-pixel text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#073B4C] truncate">
             {title}
           </span>
         </div>
@@ -127,7 +116,10 @@ export default function RetroWindow({
             {onClose ? (
               <button
                 type="button"
-                onClick={onClose}
+                onClick={() => {
+                  playErrorBump();
+                  onClose();
+                }}
                 aria-label="Cerrar ventana"
                 className={`w-4 h-4 flex items-center justify-center border-2 ${themeStyles.btnBorder} bg-[#EF476F] text-white text-[10px] leading-none hover:brightness-110 active:scale-95 transition-transform`}
               >

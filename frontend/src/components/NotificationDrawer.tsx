@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useReservas } from '@/context/ReservasContext';
 import PixelIcon from '@/components/PixelIcon';
 import PixelBadge from '@/components/PixelBadge';
+import { playMenuMove, playErrorBump } from '@/lib/retroAudio';
 
 export default function NotificationDrawer() {
   const { notificaciones, eliminarNotificacion, limpiarNotificaciones } = useReservas();
@@ -16,7 +17,10 @@ export default function NotificationDrawer() {
       {!abierto ? (
         <button
           type="button"
-          onClick={() => setAbierto(true)}
+          onClick={() => {
+            playMenuMove();
+            setAbierto(true);
+          }}
           className="flex items-center gap-2 border-3 border-[#0284c7] bg-[#38bdf8] px-4 py-2.5 font-pixel text-xs font-bold uppercase text-[#073B4C] hover:-translate-y-1 transition-all animate-bounce shadow-lg"
         >
           <span className="flex h-3 w-3 rounded-full border border-[#0284c7] bg-[#EF476F] animate-ping" />
@@ -28,13 +32,7 @@ export default function NotificationDrawer() {
           {/* Header estilo retro OS en #38bdf8 con borde #0284c7 */}
           <div className="flex items-center justify-between border-b-[3px] border-[#0284c7] bg-[#38bdf8] px-3.5 py-2">
             <div className="flex items-center gap-2 min-w-0">
-              {/* 3 Círculos Mac */}
-              <div className="flex items-center gap-1 shrink-0">
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#EF476F] border border-[#0284c7]" />
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#FFD166] border border-[#0284c7]" />
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#118AB2] border border-[#0284c7]" />
-              </div>
-              <span className="font-pixel text-xs font-bold uppercase tracking-wider text-[#073B4C] truncate ml-1">
+              <span className="font-pixel text-xs font-bold uppercase tracking-wider text-[#073B4C] truncate">
                 BULLMQ.LOG ({notificaciones.length})
               </span>
             </div>
@@ -42,7 +40,10 @@ export default function NotificationDrawer() {
             <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
-                onClick={limpiarNotificaciones}
+                onClick={() => {
+                  playErrorBump();
+                  limpiarNotificaciones();
+                }}
                 title="Limpiar bandeja"
                 className="font-pixel text-[10px] text-[#073B4C] font-bold underline hover:text-[#e11d48] px-1"
               >
@@ -50,7 +51,10 @@ export default function NotificationDrawer() {
               </button>
               <button
                 type="button"
-                onClick={() => setAbierto(false)}
+                onClick={() => {
+                  playErrorBump();
+                  setAbierto(false);
+                }}
                 className="flex h-4 w-4 items-center justify-center border-2 border-[#0284c7] bg-[#EF476F] text-white font-pixel font-bold text-[10px] leading-none hover:brightness-110 active:scale-95 transition-transform"
               >
                 ✕
@@ -95,7 +99,10 @@ export default function NotificationDrawer() {
 
                 <button
                   type="button"
-                  onClick={() => eliminarNotificacion(notif.id)}
+                  onClick={() => {
+                    playErrorBump();
+                    eliminarNotificacion(notif.id);
+                  }}
                   className="absolute top-1 right-1 text-[#073B4C]/50 hover:text-[#e11d48] font-pixel text-xs"
                 >
                   ✕

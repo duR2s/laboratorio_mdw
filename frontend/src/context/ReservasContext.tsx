@@ -11,6 +11,7 @@ import {
   apiCrearSala,
   apiEliminarSala,
 } from '@/services/api';
+import { playMenuSelect, playErrorBump } from '@/lib/retroAudio';
 
 interface ReservasContextType {
   salas: Sala[];
@@ -93,7 +94,7 @@ export function ReservasProvider({ children }: { children: React.ReactNode }) {
         }
         if (data.reservas) {
           // Normalizar formato de fecha si viene en ISO string
-          const reservasNormalizadas = data.reservas.map((r: any) => ({
+          const reservasNormalizadas = (data.reservas as Reserva[]).map((r: Reserva) => ({
             ...r,
             fecha: typeof r.fecha === 'string' && r.fecha.includes('T') ? r.fecha.split('T')[0] : r.fecha,
           }));
@@ -132,6 +133,7 @@ export function ReservasProvider({ children }: { children: React.ReactNode }) {
     versionEnviada: number
   ): Promise<{ exito: boolean; error?: string; reserva?: Reserva }> => {
     if (!usuarioActual) {
+      playErrorBump();
       return { exito: false, error: 'Debes iniciar sesión para reservar.' };
     }
 
@@ -148,7 +150,8 @@ export function ReservasProvider({ children }: { children: React.ReactNode }) {
       );
 
       if (!res.ok) {
-        // En caso de conflicto 409 o error, refrescar salas para mostrar la versión actualizada
+        // En caso de conflicto 409 o error, reproducir sonido de colisión y refrescar salas
+        playErrorBump();
         await cargarDisponibilidad(fecha);
         return {
           exito: false,
@@ -158,7 +161,8 @@ export function ReservasProvider({ children }: { children: React.ReactNode }) {
         };
       }
 
-      // Reserva creada con éxito (HTTP 201)
+      // Reserva creada con éxito (HTTP 201) -> sonido de confirmación 8-bit
+      playMenuSelect();
       const nuevaReserva = res.data.reserva as Reserva;
       const nuevaVersion = res.data.nueva_version_sala || versionEnviada + 1;
 
@@ -206,9 +210,11 @@ export function ReservasProvider({ children }: { children: React.ReactNode }) {
       setNotificaciones((prev) => [notifInmediata, notifRecordatorio, ...prev]);
 
       return { exito: true, reserva: nuevaReserva };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[confirmarReserva] Error:', err);
-      return { exito: false, error: err.message || 'Error de conexión con el servidor.' };
+      playErrorBump();
+      const message = err instanceof Error ? err.message : 'Error de conexión con el servidor.';
+      return { exito: false, error: message };
     }
   };
 
@@ -217,6 +223,7 @@ export function ReservasProvider({ children }: { children: React.ReactNode }) {
     try {
       const token = usuarioActual ? await resolverTokenUsuario(usuarioActual.email) : undefined;
       await apiCancelarReserva(reservaId, token);
+      playMenuSelect();
 
       setReservas((prev) =>
         prev.map((r) => (r.id === reservaId ? { ...r, estado: 'CANCELADA' } : r))
@@ -239,9 +246,11 @@ export function ReservasProvider({ children }: { children: React.ReactNode }) {
       }
 
       return { exito: true };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[cancelarReserva] Error:', err);
-      return { exito: false, error: err.message || 'Error al cancelar la reserva.' };
+      playErrorBump();
+      const message = err instanceof Error ? err.message : 'Error al cancelar la reserva.';
+      return { exito: false, error: message };
     }
   };
 
@@ -311,7 +320,7 @@ export function ReservasProvider({ children }: { children: React.ReactNode }) {
       }
 
       return resultados;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.warn('[ejecutarColisionConcurrencia] Fallback simulado:', err);
       // Fallback seguro si el backend no está disponible
       await new Promise((resolve) => setTimeout(resolve, 600));
